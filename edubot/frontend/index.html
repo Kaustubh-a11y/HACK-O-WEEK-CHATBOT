@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EduBot Pro — AI-Enhanced Institute Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-dark: #0f172a;
+        --card-white: #ffffff;
+        --accent-blue: #3b82f6;
+        --accent-hover: #2563eb;
+        --text-dark: #1e293b;
+        --text-light: #64748b;
+        --bot-msg-bg: #f1f5f9;
+        --user-msg-bg: #1e293b;
+        --user-msg-text: #f8fafc;
+        --border-color: #e2e8f0;
+
+        --badge-blue: #eff6ff;
+        --badge-blue-text: #2563eb;
+        --badge-orange: #fff7ed;
+        --badge-orange-text: #ea580c;
+        --badge-green: #f0fdf4;
+        --badge-green-text: #16a34a;
+        --badge-purple: #faf5ff;
+        --badge-purple-text: #9333ea;
+        --badge-gold: #fefce8;
+        --badge-gold-text: #ca8a04;
+        --badge-teal: #f0fdfa;
+        --badge-teal-text: #0d9488;
+        --badge-grey: #f8fafc;
+        --badge-grey-text: #475569;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background-color: var(--bg-dark); height: 100vh; display: flex; color: var(--text-dark); overflow: hidden; }
+    h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
+
+    .app-container { display: flex; width: 100%; height: 100%; max-width: 1400px; margin: 0 auto; background: var(--bg-dark); }
+    
+    .sidebar { width: 320px; background: #1e293b; color: white; padding: 24px; display: flex; flex-direction: column; gap: 24px; border-right: 1px solid #334155; transition: transform 0.3s ease; z-index: 20; }
+    .sidebar-header h2 { font-size: 1.25rem; margin-bottom: 4px; color: #f8fafc; }
+    .sidebar-header p { font-size: 0.85rem; color: #94a3b8; }
+    .stats-container { display: flex; flex-direction: column; gap: 16px; }
+    .stat-card { background: #0f172a; padding: 16px; border-radius: 12px; border: 1px solid #334155; }
+    .stat-card .label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 1.5rem; font-weight: 700; color: var(--accent-blue); font-family: 'Syne', sans-serif; }
+
+    .main-area { flex: 1; display: flex; flex-direction: column; background: #e2e8f0; position: relative; }
+    
+    .chat-header { background: var(--card-white); padding: 16px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); z-index: 10; }
+    .chat-header-info { display: flex; align-items: center; gap: 16px; }
+    .bot-avatar-lg { width: 48px; height: 48px; background: var(--accent-blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); }
+    .chat-title h1 { font-size: 1.25rem; color: var(--bg-dark); margin-bottom: 2px; }
+    .chat-title p { font-size: 0.85rem; color: var(--text-light); }
+    
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .channel-select { padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none; background: #f8fafc; }
+    .tab-btn { background: var(--badge-blue); color: var(--badge-blue-text); border: 1px solid #bfdbfe; font-weight: bold; border-radius: 8px; padding: 10px 16px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+    .tab-btn:hover { background: #dbeafe; }
+    .turn-counter { font-size: 0.8rem; background: var(--badge-grey); padding: 6px 12px; border-radius: 16px; color: var(--badge-grey-text); font-weight: bold; border: 1px solid #cbd5e1; }
+    .menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; color: var(--bg-dark); cursor: pointer; }
+
+    .view-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    
+    .chat-body { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
+    
+    .message-wrapper { display: flex; gap: 12px; max-width: 85%; animation: slideIn 0.3s ease-out forwards; opacity: 0; transform: translateY(10px); }
+    @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+    .message-wrapper.bot { align-self: flex-start; }
+    .message-wrapper.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .avatar.bot { background: var(--accent-blue); color: white; }
+    .avatar.user { background: var(--user-msg-text); color: var(--bg-dark); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .message-content { display: flex; flex-direction: column; gap: 8px; max-width: 100%; }
+    .bubble { padding: 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .message-wrapper.bot .bubble { background: var(--card-white); border-top-left-radius: 4px; color: var(--text-dark); }
+    .message-wrapper.user .bubble { background: var(--user-msg-bg); border-top-right-radius: 4px; color: var(--user-msg-text); }
+
+    .bubble.clarification { background: #fef08a; border-left: 4px solid #ca8a04; }
+    .fallback-card { margin-top: 12px; padding: 16px; background: #f1f5f9; border-radius: 12px; border: 1px dashed #cbd5e1; }
+    .handover-card { margin-top: 12px; padding: 16px; background: #fff1f2; border-radius: 12px; border: 1px solid #fecdd3; color: #881337; }
+
+    .intent-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; width: fit-content; text-transform: uppercase; letter-spacing: 0.5px; }
+    .conf-bar-container { width: 100px; height: 4px; background: #e2e8f0; border-radius: 2px; margin-left: auto; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 8px; }
+    .conf-bar { height: 100%; background: var(--accent-blue); border-radius: 2px; }
+    
+    .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .conf-text { font-size: 0.75rem; color: var(--text-light); display: inline-flex; align-items: center; }
+
+    .entity-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .entity-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; }
+    .entity-semester { background: #dbeafe; color: #1e40af; }
+    .entity-course { background: #dcfce7; color: #166534; }
+    .entity-date { background: #ffedd5; color: #9a3412; }
+    .entity-year { background: #f3e8ff; color: #6b21a8; }
+
+    .related-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
+    .chip { background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 16px; font-size: 0.8rem; color: var(--accent-blue); cursor: pointer; transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .chip:hover { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+    .debug-toggle { font-size: 0.8rem; color: var(--text-light); background: #f1f5f9; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 6px; cursor: pointer; margin-top: 8px; width: fit-content; display: flex; align-items: center; gap: 4px; }
+    .debug-toggle:hover { background: #e2e8f0; }
+    .debug-panel { margin-top: 8px; background: #1e293b; color: #a5b4fc; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; line-height: 1.5; display: none; }
+    .debug-panel.active { display: block; }
+    .debug-step { margin-bottom: 4px; }
+    .debug-label { color: #f8fafc; font-weight: bold; }
+
+    .feedback-row { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+    .fb-btn { background: none; border: 1px solid #e2e8f0; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; color: #64748b; }
+    .fb-btn:hover { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
+    .fb-btn.active { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; }
+
+    .typing { display: none; padding: 12px 16px; background: var(--card-white); border-radius: 16px; border-top-left-radius: 4px; width: fit-content; gap: 4px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .typing .dot { width: 6px; height: 6px; background: var(--text-light); border-radius: 50%; animation: pulse 1.4s infinite; }
+    .typing .dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.2); opacity: 1; } }
+
+    .quick-replies { padding: 12px 24px; background: var(--card-white); border-top: 1px solid var(--border-color); display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+    .quick-replies::-webkit-scrollbar { display: none; }
+    .qr-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: var(--text-dark); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .qr-btn:hover { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+    .context-banner { display: none; justify-content: space-between; align-items: center; padding: 12px 24px; background: #fefce8; font-size: 0.85rem; color: #854d0e; border-top: 1px solid #fef08a; }
+
+    .input-area { padding: 16px 24px; background: var(--card-white); display: flex; gap: 12px; align-items: flex-end; border-top: 1px solid var(--border-color); }
+    .input-wrapper { flex: 1; background: #f1f5f9; border-radius: 24px; border: 1px solid #cbd5e1; padding: 12px 20px; display: flex; align-items: center; transition: all 0.3s; }
+    .input-wrapper:focus-within { border-color: var(--accent-blue); background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .chat-input { flex: 1; border: none; background: transparent; outline: none; font-size: 1rem; font-family: 'DM Sans', sans-serif; color: var(--text-dark); resize: none; overflow: hidden; height: 24px; line-height: 24px; }
+    .send-btn { background: var(--accent-blue); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); flex-shrink: 0; }
+    .send-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+    .send-btn svg { width: 20px; height: 20px; fill: currentColor; margin-left: 2px; }
+
+    /* Analytics Dashboard Tab */
+    .dashboard-view { display: none; flex: 1; padding: 24px; overflow-y: auto; background: #f8fafc; }
+    .dash-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .dash-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+    .dash-card h3 { font-size: 0.9rem; color: var(--text-light); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .dash-card .big-num { font-size: 2rem; font-weight: bold; color: var(--text-dark); font-family: 'Syne'; }
+    
+    .chart-container { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid var(--border-color); margin-bottom: 24px; }
+    .chart-container h2 { margin-bottom: 16px; font-size: 1.25rem; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 12px; }
+    .bar-label { width: 120px; font-size: 0.85rem; font-weight: bold; color: var(--text-light); }
+    .bar-wrapper { flex: 1; height: 16px; background: #e2e8f0; border-radius: 8px; overflow: hidden; margin: 0 16px; }
+    .bar-fill { height: 100%; background: var(--accent-blue); border-radius: 8px; }
+    .bar-val { width: 50px; text-align: right; font-size: 0.85rem; font-weight: bold; }
+
+    .intent-admissions { background: var(--badge-blue); color: var(--badge-blue-text); border: 1px solid #bfdbfe; }
+    .intent-exams { background: var(--badge-orange); color: var(--badge-orange-text); border: 1px solid #fed7aa; }
+    .intent-timetable { background: var(--badge-green); color: var(--badge-green-text); border: 1px solid #bbf7d0; }
+    .intent-hostel { background: var(--badge-purple); color: var(--badge-purple-text); border: 1px solid #e9d5ff; }
+    .intent-scholarships { background: var(--badge-gold); color: var(--badge-gold-text); border: 1px solid #fef08a; }
+    .intent-placements { background: var(--badge-teal); color: var(--badge-teal-text); border: 1px solid #99f6e4; }
+    .intent-general { background: var(--badge-grey); color: var(--badge-grey-text); border: 1px solid #e2e8f0; }
+
+    @media (max-width: 768px) {
+        .sidebar { position: absolute; left: -100%; height: 100%; border-right: none; box-shadow: 4px 0 15px rgba(0,0,0,0.5); }
+        .sidebar.active { transform: translateX(100%); left: 0; }
+        .menu-toggle { display: block; }
+        .dash-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>NLP Pipeline Monitor</h2>
+            <p>Live processing stats</p>
+        </div>
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="label">Total Queries</div>
+                <div class="value" id="statQueries">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Avg Confidence</div>
+                <div class="value" id="statConf">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Top Intent</div>
+                <div class="value" id="statIntent" style="font-size: 1.2rem;">-</div>
+            </div>
+        </div>
+        <button onclick="toggleSidebar()" style="margin-top: auto; padding: 12px; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 8px; cursor: pointer;">Close Panel</button>
+    </div>
+
+    <div class="main-area">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <div class="bot-avatar-lg">🎓</div>
+                <div class="chat-title">
+                    <h1>EduBot Pro</h1>
+                    <p>Powered by TF-IDF · Intent Classification · NLP Preprocessing</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <select id="channelSelect" class="channel-select">
+                    <option value="web">💻 Web</option>
+                    <option value="mobile">📱 Mobile</option>
+                    <option value="whatsapp">💬 WhatsApp</option>
+                </select>
+                <div class="turn-counter" id="turnCounter">Turn 0</div>
+                <button class="tab-btn" onclick="toggleDashboard()" id="tabToggleBtn">📊 Analytics</button>
+            </div>
+        </div>
+
+        <div class="view-container">
+            <!-- Chat Interface -->
+            <div class="chat-view" id="chatView">
+                <div class="chat-body" id="chatBody">
+                    <div class="message-wrapper bot">
+                        <div class="avatar bot">🤖</div>
+                        <div class="message-content">
+                            <div class="bubble">
+                                <span class="intent-badge intent-general">ℹ️ GENERAL</span>
+                                <div>Hello! I'm EduBot Pro. I'm equipped with a custom Python NLP pipeline. How can I help you today?</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="message-wrapper bot" id="typingIndicator" style="display: none;">
+                        <div class="avatar bot">🤖</div>
+                        <div class="typing" style="display: flex;">
+                            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-replies">
+                    <button class="qr-btn" onclick="sendMessage('When is sem 5 cs exam?')">📋 Sem 5 CS Exams</button>
+                    <button class="qr-btn" onclick="sendMessage('What are the fees?')">⏰ Course Fees</button>
+                    <button class="qr-btn" onclick="sendMessage('Is hostel facility available?')">🏠 Hostel</button>
+                    <button class="qr-btn" onclick="sendMessage('How do I apply for admission?')">🎓 Admissions</button>
+                    <button class="qr-btn" onclick="sendMessage('What is the contact number?')">📞 Contact</button>
+                    <button class="qr-btn" onclick="sendMessage('asdasdasd')">🧪 Test Gibberish</button>
+                </div>
+
+                <!-- Follow-up banner -->
+                <div id="contextBanner" class="context-banner">
+                    <span>🔄 Follow-up context: <strong id="cbActiveContext"></strong></span>
+                    <button onclick="resetSession()" style="background: none; border: none; cursor: pointer; color: #854d0e; font-weight: bold;">[✕ Clear]</button>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Type your message here..." autocomplete="off">
+                    </div>
+                    <button class="send-btn" onclick="handleUserInput()">
+                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <div class="dashboard-view" id="dashView">
+                <div class="dash-grid-4">
+                    <div class="dash-card">
+                        <h3>🗨 Total Queries</h3>
+                        <div class="big-num" id="dashTotal">0</div>
+                    </div>
+                    <div class="dash-card">
+                        <h3>✅ Avg Confidence</h3>
+                        <div class="big-num" id="dashConf">0%</div>
+                    </div>
+                    <div class="dash-card">
+                        <h3>🔁 Fallback %</h3>
+                        <div class="big-num" id="dashFallback">0%</div>
+                    </div>
+                    <div class="dash-card">
+                        <h3>👤 Handover %</h3>
+                        <div class="big-num" id="dashHandover">0%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h2>Intent Distribution</h2>
+                    <div id="intentBars">
+                        <!-- Bars injected via JS -->
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h2>Improvement Proposals <button onclick="loadAnalytics()" style="float:right; font-size:0.8rem; padding:4px 8px; cursor:pointer;">🔄 Refresh</button></h2>
+                    <div id="proposalsList">
+                        <!-- Proposals injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.sessionId = null;
+let isDashboard = false;
+let navStats = { total: 0, confSum: 0, intentsCount: {} };
+
+function updateNavStats(conf, intentName) {
+    navStats.total++;
+    navStats.confSum += conf;
+    navStats.intentsCount[intentName] = (navStats.intentsCount[intentName] || 0) + 1;
+    
+    document.getElementById('statQueries').innerText = navStats.total;
+    document.getElementById('statConf').innerText = Math.round((navStats.confSum / navStats.total)) + '%';
+    
+    let topIntent = "-";
+    let max = 0;
+    for(let i in navStats.intentsCount) { if(navStats.intentsCount[i] > max) { max = navStats.intentsCount[i]; topIntent = i; } }
+    document.getElementById('statIntent').innerText = topIntent;
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+
+function toggleDashboard() {
+    isDashboard = !isDashboard;
+    document.getElementById('chatView').style.display = isDashboard ? 'none' : 'flex';
+    document.getElementById('dashView').style.display = isDashboard ? 'block' : 'none';
+    document.getElementById('tabToggleBtn').innerText = isDashboard ? '💬 Back to Chat' : '📊 Analytics';
+    if(isDashboard) loadAnalytics();
+}
+
+async function loadAnalytics() {
+    try {
+        let res = await fetch('http://localhost:5000/analytics/report');
+        let data = await res.json();
+        
+        document.getElementById('dashTotal').innerText = data.volume?.total_interactions || 0;
+        document.getElementById('dashConf').innerText = Math.round((data.quality?.avg_confidence_score || 0)*100) + '%';
+        document.getElementById('dashFallback').innerText = Math.round((data.quality?.fallback_rate || 0)*100) + '%';
+        document.getElementById('dashHandover').innerText = Math.round((data.quality?.handover_rate || 0)*100) + '%';
+        
+        // Render Intent Bars
+        let total = data.volume?.total_interactions || 1;
+        let intents = data.intents || {};
+        let barsHtml = "";
+        for(let intent in intents) {
+            let pct = Math.round((intents[intent] / total) * 100);
+            barsHtml += `
+            <div class="bar-row">
+                <div class="bar-label">${intent}</div>
+                <div class="bar-wrapper"><div class="bar-fill" style="width:${pct}%"></div></div>
+                <div class="bar-val">${pct}%</div>
+            </div>`;
+        }
+        document.getElementById('intentBars').innerHTML = barsHtml || "<p>No data yet.</p>";
+
+        // Proposals
+        let pres = await fetch('http://localhost:5000/analytics/proposals');
+        let pdata = await pres.json();
+        let phtml = "";
+        pdata.forEach(p => {
+            let color = p.priority === "HIGH" ? "#fee2e2" : (p.priority === "MEDIUM" ? "#fef3c7" : "#dcfce7");
+            let border = p.priority === "HIGH" ? "#ef4444" : (p.priority === "MEDIUM" ? "#f59e0b" : "#22c55e");
+            phtml += `
+            <div style="background:${color}; border-left:4px solid ${border}; padding:12px; margin-bottom:12px; border-radius:4px;">
+                <strong>[${p.priority}] ${p.type.toUpperCase().replace('_', ' ')}:</strong> ${p.evidence}
+                <br><span style="font-size:0.85rem; color:#475569;">Suggestion: ${p.proposed_question || p.proposed_intent || p.word_to_add || ''}</span>
+            </div>`;
+        });
+        document.getElementById('proposalsList').innerHTML = phtml || "<p>No improvement proposals generated yet.</p>";
+
+    } catch(err) { console.error("Could not load analytics", err); }
+}
+
+function updateContextBanner(data) {
+    if(!data.debug) return;
+    const banner = document.getElementById('contextBanner');
+    const ctxText = document.getElementById('cbActiveContext');
+    const activeIntent = data.debug.context_active_intent;
+    const activeEntities = data.debug.context_active_entities;
+    
+    let ctxString = [];
+    if (activeIntent && activeIntent !== "GENERAL") ctxString.push(activeIntent);
+    
+    if (activeEntities) {
+        if(activeEntities.semester && activeEntities.course) {
+            ctxString.push(`Sem ${activeEntities.semester} ${activeEntities.course}`);
+        } else if(activeEntities.semester) {
+            ctxString.push(`Sem ${activeEntities.semester}`);
+        } else if(activeEntities.course) {
+            ctxString.push(activeEntities.course);
+        }
+    }
+    
+    if (ctxString.length > 0) {
+        banner.style.display = 'flex';
+        ctxText.innerText = ctxString.join(' › ');
+    } else {
+        banner.style.display = 'none';
+    }
+}
+
+async function resetSession() {
+    if(!window.sessionId) return;
+    try {
+        await fetch('http://localhost:5000/reset', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: window.sessionId })
+        });
+        window.sessionId = null;
+        document.getElementById('contextBanner').style.display = 'none';
+        document.getElementById('turnCounter').innerText = "Turn 0";
+        appendSimpleBotMsg("Session reset. We're starting fresh!");
+    } catch(err) {
+        console.error(err);
+    }
+}
+
+async function sendMessage(userText) {
+    let input = document.getElementById('chatInput');
+    if(userText) input.value = userText;
+    handleUserInput();
+}
+
+document.getElementById('chatInput').addEventListener('keypress', function(e) { if(e.key === 'Enter') handleUserInput(); });
+
+async function handleFeedback(logId, btn, isThumbsUp) {
+    btn.parentElement.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    try {
+        await fetch('http://localhost:5000/feedback', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ log_id: logId, thumbs_up: isThumbsUp, comment: "" })
+        });
+    } catch(err) { console.error(err); }
+}
+
+async function handleUserInput() {
+    let input = document.getElementById('chatInput');
+    let text = input.value.trim();
+    if (!text) return;
+    
+    let channel_id = document.getElementById('channelSelect').value;
+    
+    appendUserMsg(text);
+    input.value = '';
+    
+    let typing = document.getElementById('typingIndicator');
+    document.getElementById('chatBody').appendChild(typing);
+    typing.style.display = 'flex';
+    scrollToBottom();
+    
+    try {
+        const res = await fetch(`http://localhost:5000/chat/${channel_id}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                message: text,
+                session_id: window.sessionId
+            })
+        });
+        const data = await res.json();
+        
+        window.sessionId = data.session_id;
+        document.getElementById('turnCounter').innerText = `Turn ${data.turns_count || 1}`;
+        
+        typing.style.display = 'none';
+
+        if(channel_id === "web") {
+            renderWebMessage(data);
+        } else if (channel_id === "mobile") {
+            appendSimpleBotMsg(`📱 <b>[Mobile View]</b><br><br>${data.card.title}<br>${data.card.body}`);
+        } else if (channel_id === "whatsapp") {
+            appendSimpleBotMsg(`💬 <b>[WhatsApp View]</b><br><br>${data.messages[0].body.replace(/\n/g, '<br>')}`);
+        }
+        
+    } catch(err) {
+        typing.style.display = 'none';
+        console.error(err);
+        appendSimpleBotMsg("Error connecting to server. Make sure the Python Flask app is running on port 5000.");
+    }
+}
+
+function appendUserMsg(text) {
+    let html = `<div class="message-wrapper user"><div class="avatar user">👤</div><div class="message-content"><div class="bubble">${text}</div></div></div>`;
+    document.getElementById('typingIndicator').insertAdjacentHTML('beforebegin', html);
+    scrollToBottom();
+}
+
+function appendSimpleBotMsg(text) {
+    let html = `<div class="message-wrapper bot"><div class="avatar bot">🤖</div><div class="message-content"><div class="bubble">${text}</div></div></div>`;
+    document.getElementById('typingIndicator').insertAdjacentHTML('beforebegin', html);
+    scrollToBottom();
+}
+
+function renderWebMessage(data) {
+    let intentClass = "intent-general";
+    let intent = data.bubble.intent_badge.label;
+    if(intent === "ADMISSIONS") intentClass = "intent-admissions";
+    if(intent === "EXAMS") intentClass = "intent-exams";
+    if(intent === "TIMETABLE") intentClass = "intent-timetable";
+    if(intent === "HOSTEL") intentClass = "intent-hostel";
+    if(intent === "SCHOLARSHIPS") intentClass = "intent-scholarships";
+    if(intent === "PLACEMENTS") intentClass = "intent-placements";
+    
+    let conf = data.bubble.confidence_bar.percent;
+    updateNavStats(conf, intent);
+    updateContextBanner(data);
+
+    let id = 'debug_' + Math.random().toString(36).substr(2, 9);
+    
+    // Chips
+    let chipsHtml = "";
+    if(data.bubble.related_chips && data.bubble.related_chips.length > 0) {
+        chipsHtml = `<div class="related-chips"><div style="width:100%; font-size:0.75rem; color:var(--text-light); margin-bottom:4px;">Related Questions:</div>` + 
+                    data.bubble.related_chips.map(r => `<div class="chip" onclick="sendMessage('${r.replace(/'/g,"\\'")}')">${r}</div>`).join('') + `</div>`;
+    }
+    
+    // Entities
+    let entitiesHtml = "";
+    if (data.bubble.entity_tags && data.bubble.entity_tags.length > 0) {
+        entitiesHtml += `<div class="entity-tags">`;
+        data.bubble.entity_tags.forEach(t => {
+            entitiesHtml += `<span class="entity-tag" style="background:${t.color}22; color:${t.color}; border:1px solid ${t.color}55;">${t.type}: ${t.value}</span>`;
+        });
+        entitiesHtml += `</div>`;
+    }
+
+    // Fallbacks
+    let fallbackHtml = "";
+    if (data.bubble.fallback_card) {
+        let fb = data.bubble.fallback_card;
+        if (fb.type === "suggestion") {
+            fallbackHtml = `
+            <div class="fallback-card">
+              <b>🤔 ${fb.message}</b>
+              <div style="margin-top:8px;">${fb.did_you_mean.map(s => `<button class="qr-btn" style="margin-bottom:4px;" onclick="sendMessage('${s.question.replace(/'/g,"\\'")}')">${s.question}</button> `).join('')}</div>
+            </div>`;
+        } else if (fb.type === "clarification") {
+            fallbackHtml = `
+            <div class="fallback-card" style="border-left: 4px solid #f59e0b;">
+              <b>❓ ${fb.message}</b>
+              <div style="margin-top:8px; font-size:0.85rem;">
+                ${fb.follow_up_prompt}<br>
+                ${fb.suggestions.map(s => `<button class="qr-btn" style="margin-top:8px; display:block;" onclick="sendMessage('${s.replace(/'/g,"\\'")}')">${s}</button>`).join('')}
+              </div>
+            </div>`;
+        } else if (fb.type === "handover") {
+            fallbackHtml = `
+            <div class="handover-card">
+              <b>👤 Human Handover</b><br>
+              <p style="font-size:0.85rem; margin:8px 0;">${fb.message}</p>
+              <div style="background:white; padding:12px; border-radius:8px; border:1px solid #fecdd3; font-size:0.85rem;">
+                <b>${fb.contact.name}</b><br>
+                📞 ${fb.contact.phone}<br>
+                📧 <a href="${fb.mailto_link}">${fb.contact.email}</a><br>
+                📍 ${fb.contact.desk}<br>
+                🕒 ${fb.contact.hours}
+              </div>
+              <p style="font-size:0.75rem; margin-top:8px;">${fb.escalation_note}</p>
+            </div>`;
+        }
+    }
+
+    // Debug Panel
+    let d = data.bubble.debug_panel;
+    let debugHtml = `
+        <button class="debug-toggle" onclick="document.getElementById('${id}').classList.toggle('active')">🔍 Show NLP Debug</button>
+        <div class="debug-panel" id="${id}">
+            <div class="debug-step"><span class="debug-label">Step 1 (Lowercased):</span> "${d.step1_lowercased || ''}"</div>
+            <div class="debug-step"><span class="debug-label">Step 2 (No Punctuation):</span> "${d.step2_no_punct || ''}"</div>
+            <div class="debug-step"><span class="debug-label">Step 3 (Tokens):</span> [${(d.step3_tokens || []).map(t=>`"${t}"`).join(", ")}]</div>
+            
+            <br>
+            <div class="debug-step" style="color:var(--badge-gold-text);"><span class="debug-label">🔍 Entity Extraction:</span></div>
+            <div class="debug-step">&nbsp;&nbsp;Semester: ${(d.entities_raw || {}).semester || 'not found'}</div>
+            <div class="debug-step">&nbsp;&nbsp;Course: ${(d.entities_raw || {}).course || 'not found'}</div>
+            <div class="debug-step">&nbsp;&nbsp;Year: ${(d.entities_raw || {}).year || 'not found'}</div>
+            
+            <br>
+            <div class="debug-step" style="color:var(--badge-blue-text);"><span class="debug-label">🔄 Context Resolution:</span></div>
+            <div class="debug-step">&nbsp;&nbsp;Is follow-up: ${data.is_followup ? 'Yes' : 'No'}</div>
+            <div class="debug-step">&nbsp;&nbsp;Active intent: ${d.context_active_intent || 'None'}</div>
+            <div class="debug-step">&nbsp;&nbsp;Enriched query: "${data.enriched_query}"</div>
+        </div>
+    `;
+
+    // Feedback
+    let feedbackHtml = `
+        <div class="feedback-row">
+            <button class="fb-btn" onclick="handleFeedback('${data.log_id}', this, true)">👍</button>
+            <button class="fb-btn" onclick="handleFeedback('${data.log_id}', this, false)">👎</button>
+        </div>
+    `;
+
+    let html = `
+    <div class="message-wrapper bot">
+        <div class="avatar bot">🤖</div>
+        <div class="message-content" style="width: 100%;">
+            <div class="bubble">
+                <div class="meta-row">
+                    <span class="intent-badge ${intentClass}">[${intent}]</span>
+                    <div class="conf-text">Conf: ${conf}% <div class="conf-bar-container"><div class="conf-bar" style="width: ${conf}%;"></div></div></div>
+                </div>
+                ${entitiesHtml}
+                <div class="answer-text">${data.bubble.answer_html}</div>
+                ${fallbackHtml}
+                ${chipsHtml}
+                ${feedbackHtml}
+                ${debugHtml}
+            </div>
+        </div>
+    </div>`;
+    
+    document.getElementById('typingIndicator').insertAdjacentHTML('beforebegin', html);
+    
+    if(data.bubble.clarification_prompt) {
+        let clarifyHtml = `
+        <div class="message-wrapper bot">
+            <div class="avatar bot" style="background: #eab308; color: white;">❓</div>
+            <div class="message-content" style="width: 100%;">
+                <div class="bubble clarification">
+                    ${data.bubble.clarification_prompt}
+                </div>
+            </div>
+        </div>`;
+        document.getElementById('typingIndicator').insertAdjacentHTML('beforebegin', clarifyHtml);
+    }
+    
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    let cb = document.getElementById('chatBody');
+    cb.scrollTo(0, cb.scrollHeight);
+}
+
+window.onload = function() {
+    document.getElementById('chatInput').focus();
+};
+</script>
+</body>
+</html>

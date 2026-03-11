@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EduBot Pro — AI-Enhanced Institute Assistant</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-white: #ffffff;
+            --accent-blue: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bot-msg-bg: #f1f5f9;
+            --user-msg-bg: #1e293b;
+            --user-msg-text: #f8fafc;
+            --border-color: #e2e8f0;
+
+            --badge-blue: #eff6ff;
+            --badge-blue-text: #2563eb;
+            --badge-orange: #fff7ed;
+            --badge-orange-text: #ea580c;
+            --badge-green: #f0fdf4;
+            --badge-green-text: #16a34a;
+            --badge-purple: #faf5ff;
+            --badge-purple-text: #9333ea;
+            --badge-gold: #fefce8;
+            --badge-gold-text: #ca8a04;
+            --badge-teal: #f0fdfa;
+            --badge-teal-text: #0d9488;
+            --badge-grey: #f8fafc;
+            --badge-grey-text: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Syne', sans-serif;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-dark);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: #1e293b;
+            color: white;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            border-right: 1px solid #334155;
+            transition: transform 0.3s ease;
+            z-index: 20;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+            color: #f8fafc;
+        }
+
+        .sidebar-header p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: #0f172a;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-family: 'Syne', sans-serif;
+        }
+
+        /* Main Chat Area */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #e2e8f0;
+            position: relative;
+        }
+
+        /* Header */
+        .chat-header {
+            background: var(--card-white);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .bot-avatar-lg {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-blue);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+
+        .chat-title h1 {
+            font-size: 1.25rem;
+            color: var(--bg-dark);
+            margin-bottom: 2px;
+        }
+
+        .chat-title p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--bg-dark);
+            cursor: pointer;
+        }
+
+        /* Chat Body */
+        .chat-body {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .message-wrapper {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-wrapper.bot {
+            align-self: flex-start;
+        }
+
+        .message-wrapper.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .avatar.bot {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .avatar.user {
+            background: var(--user-msg-text);
+            color: var(--bg-dark);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 100%;
+        }
+
+        .bubble {
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-wrapper.bot .bubble {
+            background: var(--card-white);
+            border-top-left-radius: 4px;
+            color: var(--text-dark);
+        }
+
+        .message-wrapper.user .bubble {
+            background: var(--user-msg-bg);
+            border-top-right-radius: 4px;
+            color: var(--user-msg-text);
+        }
+
+        /* Tags & Badges */
+        .intent-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            width: fit-content;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .conf-bar-container {
+            width: 100px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin-left: auto;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .conf-bar {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 2px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .conf-text {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* Related Questions Chips */
+        .related-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .chip {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .chip:hover {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        /* Debug Panel */
+        .debug-toggle {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 8px;
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .debug-toggle:hover {
+            background: #e2e8f0;
+        }
+
+        .debug-panel {
+            margin-top: 8px;
+            background: #1e293b;
+            color: #a5b4fc;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .debug-panel.active {
+            display: block;
+        }
+
+        .debug-step {
+            margin-bottom: 4px;
+        }
+
+        .debug-label {
+            color: #f8fafc;
+            font-weight: bold;
+        }
+
+        /* Typing Indicator */
+        .typing {
+            display: none;
+            padding: 12px 16px;
+            background: var(--card-white);
+            border-radius: 16px;
+            border-top-left-radius: 4px;
+            width: fit-content;
+            gap: 4px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .typing .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-light);
+            border-radius: 50%;
+            animation: pulse 1.4s infinite;
+        }
+
+        .typing .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(0.8);
+                opacity: 0.4;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* Quick Replies */
+        .quick-replies {
+            padding: 12px 24px;
+            background: var(--card-white);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .quick-replies::-webkit-scrollbar {
+            display: none;
+        }
+
+        .qr-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: var(--text-dark);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .qr-btn:hover {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 16px 24px;
+            background: var(--card-white);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            background: #f1f5f9;
+            border-radius: 24px;
+            border: 1px solid #cbd5e1;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent-blue);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-dark);
+            resize: none;
+            overflow: hidden;
+            height: 24px;
+            line-height: 24px;
+        }
+
+        .send-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            margin-left: 2px;
+        }
+
+        /* Colors for Intents */
+        .intent-admissions {
+            background: var(--badge-blue);
+            color: var(--badge-blue-text);
+            border: 1px solid #bfdbfe;
+        }
+
+        .intent-exams {
+            background: var(--badge-orange);
+            color: var(--badge-orange-text);
+            border: 1px solid #fed7aa;
+        }
+
+        .intent-timetable {
+            background: var(--badge-green);
+            color: var(--badge-green-text);
+            border: 1px solid #bbf7d0;
+        }
+
+        .intent-hostel {
+            background: var(--badge-purple);
+            color: var(--badge-purple-text);
+            border: 1px solid #e9d5ff;
+        }
+
+        .intent-scholarships {
+            background: var(--badge-gold);
+            color: var(--badge-gold-text);
+            border: 1px solid #fef08a;
+        }
+
+        .intent-placements {
+            background: var(--badge-teal);
+            color: var(--badge-teal-text);
+            border: 1px solid #99f6e4;
+        }
+
+        .intent-general {
+            background: var(--badge-grey);
+            color: var(--badge-grey-text);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: -100%;
+                height: 100%;
+                border-right: none;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.active {
+                transform: translateX(100%);
+                left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>NLP Pipeline Monitor</h2>
+                <p>Live processing stats</p>
+            </div>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="label">Total Queries</div>
+                    <div class="value" id="statQueries">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Avg Confidence</div>
+                    <div class="value" id="statConf">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Top Intent</div>
+                    <div class="value" id="statIntent" style="font-size: 1.2rem;">-</div>
+                </div>
+            </div>
+            <button onclick="toggleSidebar()"
+                style="margin-top: auto; padding: 12px; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 8px; cursor: pointer;">Close
+                Panel</button>
+        </div>
+
+        <!-- Main Chat Interface -->
+        <div class="main-area">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                    <div class="bot-avatar-lg">🎓</div>
+                    <div class="chat-title">
+                        <h1>EduBot Pro</h1>
+                        <p>Powered by TF-IDF · Intent Classification · NLP Preprocessing</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-body" id="chatBody">
+                <div class="message-wrapper bot">
+                    <div class="avatar bot">🤖</div>
+                    <div class="message-content">
+                        <div class="bubble">
+                            <span class="intent-badge intent-general">ℹ️ GENERAL</span>
+                            <div>Hello! I'm EduBot Pro. I'm equipped with a custom NLP pipeline to understand your
+                                questions better. How can I help you today?</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-wrapper bot" id="typingIndicator"
+                    style="display: none; opacity: 1; transform: none; animation: none;">
+                    <div class="avatar bot">🤖</div>
+                    <div class="typing" style="display: flex;">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-replies">
+                <button class="qr-btn" onclick="sendMsg('What are the fees?')">📋 Fees</button>
+                <button class="qr-btn" onclick="sendMsg('What are the institute timings?')">⏰ Timings</button>
+                <button class="qr-btn" onclick="sendMsg('Is hostel facility available?')">🏠 Hostel</button>
+                <button class="qr-btn" onclick="sendMsg('How do I apply for admission?')">🎓 Admissions</button>
+                <button class="qr-btn" onclick="sendMsg('What is the placement record?')">💼 Placements</button>
+                <button class="qr-btn" onclick="sendMsg('Tell me about exams')">📝 Exams</button>
+                <button class="qr-btn" onclick="sendMsg('Where is the campus located?')">🏫 Location</button>
+                <button class="qr-btn" onclick="sendMsg('What is the contact number?')">📞 Contact</button>
+            </div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="Type your message here..."
+                        autocomplete="off">
+                </div>
+                <button class="send-btn" onclick="handleUserInput()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================================
+           FAQ CORPUS
+           ========================================================================= */
+        const corpus = [
+            { id: 1, q: "What are the institute timings?", a: "We are open Monday to Saturday, 8:00 AM to 6:00 PM." },
+            { id: 2, q: "What courses does the institute offer?", a: "We offer BCA, BBA, B.Sc IT, MBA, and MCA programs." },
+            { id: 3, q: "What are the admission fees?", a: "UG courses: ₹45,000/year. PG courses: ₹60,000/year." },
+            { id: 4, q: "How do I apply for admission?", a: "Visit campus or apply online at www.institute.edu.in" },
+            { id: 5, q: "What is the last date for admission?", a: "The last date for admission is 30th June 2025." },
+            { id: 6, q: "Where is the institute located?", a: "123, College Road, Nagpur, Maharashtra - 440001." },
+            { id: 7, q: "What is the contact number?", a: "Call us at +91-712-2345678 (Mon–Sat, 9AM–5PM)." },
+            { id: 8, q: "What is the email address?", a: "Email us at admissions@institute.edu.in" },
+            { id: 9, q: "Is hostel facility available?", a: "Yes! Separate hostels for boys and girls with 24/7 security." },
+            { id: 10, q: "Do you offer scholarships?", a: "Yes, merit-based and need-based scholarships are available." },
+            { id: 11, q: "What is the student teacher ratio?", a: "Our student-teacher ratio is 20:1." },
+            { id: 12, q: "What is the placement record?", a: "85%+ placement record. Top recruiters include TCS, Infosys, Wipro." },
+            { id: 13, q: "Is the institute affiliated to any university?", a: "Yes, affiliated to RTM Nagpur University. NAAC A+ accredited." },
+            { id: 14, q: "What documents are needed for admission?", a: "10th & 12th marksheets, ID proof, passport-size photo, TC." },
+            { id: 15, q: "How do I contact the principal?", a: "Email: principal@institute.edu.in or visit during 10AM–12PM." }
+        ];
+
+        /* =========================================================================
+           MODULE 1 — TEXT PREPROCESSING PIPELINE
+           ========================================================================= */
+        const stopwords = new Set(["a", "an", "the", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "will", "would", "could", "should", "may", "might", "shall", "can", "need", "i", "me", "my", "we", "our", "you", "your", "it", "its", "this", "that", "these", "those", "what", "how", "when", "where", "who", "which", "tell", "please", "want", "know", "about", "of", "in", "on", "at", "to", "for", "with", "by"]);
+
+        const spellingCorrections = {
+            "fess": "fees", "fie": "fees", "coarse": "course", "corse": "course",
+            "timin": "timing", "timming": "timing", "addmission": "admission",
+            "admision": "admission", "scolarship": "scholarship",
+            "scholaship": "scholarship", "hosstel": "hostel", "hostl": "hostel",
+            "placment": "placement", "plcement": "placement", "affilated": "affiliated",
+            "contcat": "contact", "princpal": "principal", "documnt": "document",
+            "semster": "semester", "semestre": "semester", "libary": "library",
+            "libraray": "library", "examm": "exam", "timetabel": "timetable"
+        };
+
+        function preprocessText(text) {
+            const debug = { original: text };
+
+            // STEP 1: Lowercasing
+            let processed = text.toLowerCase();
+            debug.lowercased = processed;
+
+            // STEP 2: Punctuation Removal
+            processed = processed.replace(/[.,!?;:'"()\[\]{}/\\@#$%^&*~`]/g, "");
+            debug.noPunctuation = processed;
+
+            // STEP 3: Tokenization
+            let tokens = processed.split(/\s+/).filter(t => t.length > 0);
+            debug.tokens = [...tokens];
+
+            // STEP 4: Stopword Removal
+            tokens = tokens.filter(t => !stopwords.has(t));
+            debug.noStopwords = [...tokens];
+
+            // STEP 5: Spelling Normalization
+            tokens = tokens.map(t => spellingCorrections[t] || t);
+            debug.normalized = [...tokens];
+
+            return { tokens, debug };
+        }
+
+        /* =========================================================================
+           MODULE 2 — SYNONYM-AWARE MATCHING (Keyword Groups)
+           ========================================================================= */
+        const synonymGroups = {
+            fees: ["fees", "fee", "cost", "costs", "tuition", "payment", "charge", "charges", "price", "pricing", "amount", "pay", "expense", "expenses"],
+            timing: ["timing", "timings", "time", "times", "hours", "hour", "schedule", "open", "opening", "close", "closing", "working", "office"],
+            courses: ["course", "courses", "program", "programs", "degree", "degrees", "branch", "branches", "stream", "streams", "subject", "subjects", "offer", "offered", "available", "study", "studying"],
+            admission: ["admission", "admissions", "apply", "application", "enroll", "enrollment", "join", "joining", "register", "registration", "form", "forms", "process", "procedure", "eligibility"],
+            contact: ["contact", "contacts", "phone", "number", "call", "email", "mail", "address", "reach", "helpline", "support", "connect"],
+            location: ["location", "address", "located", "place", "where", "campus", "situated", "find", "directions", "map", "area", "city"],
+            hostel: ["hostel", "hostels", "accommodation", "stay", "dormitory", "dorm", "room", "rooms", "boarding", "lodge", "lodging", "pg", "housing", "residence"],
+            scholarship: ["scholarship", "scholarships", "financial", "aid", "stipend", "grant", "grants", "merit", "waiver", "concession", "discount", "free", "sponsored", "fund", "funding"],
+            placement: ["placement", "placements", "job", "jobs", "career", "careers", "recruit", "recruitment", "company", "companies", "hire", "hiring", "employ", "employment", "package", "salary", "lpa", "ctc", "campus"],
+            exam: ["exam", "exams", "examination", "test", "tests", "assessment", "marks", "grade", "grades", "result", "results", "score", "scores", "paper", "papers", "pattern", "syllabus"],
+            timetable: ["timetable", "timetables", "class", "classes", "lecture", "lectures", "period", "periods", "routine", "calendar", "schedule", "session", "sessions"],
+            library: ["library", "books", "book", "read", "reading", "study", "resources", "digital", "e-library", "elib", "journals", "reference"],
+            principal: ["principal", "director", "head", "hod", "faculty", "teacher", "professor", "staff", "administration", "admin"],
+            documents: ["document", "documents", "certificate", "certificates", "marksheet", "marksheets", "required", "need", "submit", "submission", "proof", "id", "photo", "passport"],
+            affiliation: ["affiliated", "affiliation", "university", "board", "recognized", "approved", "accredited", "naac", "ugc", "aicte"]
+        };
+
+        // Map each group to a specific FAQ ID (if applicable) for direct topic matching
+        const topicToFaqMap = { fees: 3, timing: 1, courses: 2, admission: 4, contact: 7, location: 6, hostel: 9, scholarship: 10, placement: 12, principal: 15, documents: 14, affiliation: 13 };
+
+        function getMatchedTopics(tokens) {
+            let matchedTopics = new Set();
+            tokens.forEach(token => {
+                for (const [topic, words] of Object.entries(synonymGroups)) {
+                    if (words.includes(token)) matchedTopics.add(topic);
+                }
+            });
+            return Array.from(matchedTopics);
+        }
+
+        /* =========================================================================
+           MODULE 3 — TF-IDF RETRIEVAL ENGINE
+           ========================================================================= */
+        function computeTF(tokens) {
+            let tf = {};
+            if (tokens.length === 0) return tf;
+            tokens.forEach(t => { tf[t] = (tf[t] || 0) + 1; });
+            for (let t in tf) { tf[t] = tf[t] / tokens.length; }
+            return tf;
+        }
+
+        // Precompute IDF for Corpus
+        let corpusTokensArr = corpus.map(doc => preprocessText(doc.q).tokens);
+        let df = {};
+        let totalDocs = corpus.length;
+        corpusTokensArr.forEach(tokens => {
+            let uniqueTokens = new Set(tokens);
+            uniqueTokens.forEach(t => { df[t] = (df[t] || 0) + 1; });
+        });
+
+        function computeIDF(token) {
+            let docsWithToken = df[token] || 0;
+            return Math.log(totalDocs / (1 + docsWithToken));
+        }
+
+        // Precompute TF-IDF for corpus documents
+        let corpusVectors = corpusTokensArr.map(tokens => {
+            let tf = computeTF(tokens);
+            let vector = {};
+            for (let t in tf) { vector[t] = tf[t] * computeIDF(t); }
+            return vector;
+        });
+
+        function computeVectorNorm(vec) {
+            return Math.sqrt(Object.values(vec).reduce((sum, val) => sum + val * val, 0));
+        }
+
+        function cosineSimilarity(vecA, vecB) {
+            let dotProduct = 0;
+            for (let key in vecA) { if (vecB[key]) dotProduct += vecA[key] * vecB[key]; }
+            let normA = computeVectorNorm(vecA);
+            let normB = computeVectorNorm(vecB);
+            if (normA === 0 || normB === 0) return 0;
+            return dotProduct / (normA * normB);
+        }
+
+        function retrieveFAQ(queryTokens) {
+            let queryTfIdf = {};
+            let tf = computeTF(queryTokens);
+            for (let t in tf) { queryTfIdf[t] = tf[t] * computeIDF(t); }
+
+            let scores = corpus.map((doc, idx) => {
+                return { doc, score: cosineSimilarity(queryTfIdf, corpusVectors[idx]) };
+            });
+
+            // Sort descending
+            scores.sort((a, b) => b.score - a.score);
+            return scores;
+        }
+
+        /* =========================================================================
+           MODULE 4 — INTENT CLASSIFICATION (Naïve Bayes-style)
+           ========================================================================= */
+        const intents = {
+            ADMISSIONS: { keywords: ["admission", "apply", "application", "enroll", "register", "join", "form", "eligibility", "deadline", "last date", "document", "process", "fees", "seat", "vacancy"], prefix: "🎓 [Admissions Desk]", className: "intent-admissions" },
+            EXAMS: { keywords: ["exam", "examination", "test", "result", "marks", "grade", "score", "paper", "syllabus", "pattern", "assessment", "internal", "external", "practical", "theory"], prefix: "📝 [Examination Cell]", className: "intent-exams" },
+            TIMETABLE: { keywords: ["timetable", "class", "lecture", "schedule", "period", "routine", "timing", "when", "session", "calendar", "semester", "weekly"], prefix: "📅 [Academic Scheduler]", className: "intent-timetable" },
+            HOSTEL: { keywords: ["hostel", "accommodation", "stay", "room", "dorm", "boarding", "lodge", "pg", "mess", "food", "warden", "facility", "boys", "girls", "residence"], prefix: "🏠 [Hostel Office]", className: "intent-hostel" },
+            SCHOLARSHIPS: { keywords: ["scholarship", "financial", "aid", "merit", "stipend", "grant", "waiver", "concession", "discount", "free", "fund", "needy", "income", "caste", "category"], prefix: "💰 [Scholarship Cell]", className: "intent-scholarships" },
+            PLACEMENTS: { keywords: ["placement", "job", "career", "recruit", "company", "hire", "salary", "package", "ctc", "lpa", "internship", "campus", "drive", "offer", "letter"], prefix: "💼 [Placement Cell]", className: "intent-placements" }
+        };
+
+        function classifyIntent(tokens, rawOrig) {
+            let scores = {};
+            for (let intent in intents) { scores[intent] = 0; }
+
+            tokens.forEach(token => {
+                for (let intent in intents) {
+                    if (intents[intent].keywords.includes(token)) scores[intent] += 1;
+                }
+            });
+
+            // Exact phrase check in original text gives +2
+            for (let intent in intents) {
+                intents[intent].keywords.forEach(kw => {
+                    if (kw.includes(" ") && rawOrig.includes(kw)) scores[intent] += 2;
+                });
+            }
+
+            let maxScore = -1;
+            let bestIntent = null;
+            let ties = 0;
+
+            for (let intent in scores) {
+                if (scores[intent] > maxScore) { maxScore = scores[intent]; bestIntent = intent; ties = 1; }
+                else if (scores[intent] === maxScore && maxScore > 0) { ties++; }
+            }
+
+            if (maxScore === 0) return { name: "GENERAL", prefix: "🤖 [General Assistant]", className: "intent-general", score: 0 };
+            if (ties > 1) return { name: "MULTI_INTENT", prefix: "🧩 [Multi-Department]", className: "intent-general", score: maxScore };
+
+            return { name: bestIntent, prefix: intents[bestIntent].prefix, className: intents[bestIntent].className, score: maxScore };
+        }
+
+        /* =========================================================================
+           UI / MAIN LOGIC
+           ========================================================================= */
+        let stats = { total: 0, confSum: 0, intentsCount: {} };
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+
+        function updateStats(conf, intentName) {
+            stats.total++;
+            stats.confSum += conf;
+            stats.intentsCount[intentName] = (stats.intentsCount[intentName] || 0) + 1;
+
+            document.getElementById('statQueries').innerText = stats.total;
+            document.getElementById('statConf').innerText = Math.round((stats.confSum / stats.total) * 100) + '%';
+
+            let topIntent = "-";
+            let max = 0;
+            for (let i in stats.intentsCount) { if (stats.intentsCount[i] > max) { max = stats.intentsCount[i]; topIntent = i; } }
+            document.getElementById('statIntent').innerText = topIntent;
+        }
+
+        function sendMsg(text) {
+            let input = document.getElementById('chatInput');
+            if (text) input.value = text;
+            handleUserInput();
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleUserInput(); });
+
+        function handleUserInput() {
+            let input = document.getElementById('chatInput');
+            let text = input.value.trim();
+            if (!text) return;
+
+            appendUserMsg(text);
+            input.value = '';
+
+            let typing = document.getElementById('typingIndicator');
+            document.getElementById('chatBody').appendChild(typing);
+            typing.style.display = 'flex';
+            scrollToBottom();
+
+            setTimeout(() => {
+                typing.style.display = 'none';
+                processBotResponse(text);
+            }, 400); // 400ms delay as requested
+        }
+
+        function processBotResponse(rawText) {
+            let { tokens, debug } = preprocessText(rawText);
+            let matchedTopics = getMatchedTopics(tokens);
+            debug.matchedTopics = matchedTopics;
+
+            let intentInfo = classifyIntent(tokens, rawText.toLowerCase());
+            debug.intent = `${intentInfo.name} (score: ${intentInfo.score})`;
+
+            // Module 3 & 2 integration
+            // If a topic is detected via Module 2, inject its keywords heavily to guarantee TF-IDF catches it.
+            let searchTokens = [...tokens];
+            matchedTopics.forEach(topic => { searchTokens.push(topic, topic, topic); }); // Boost
+
+            let scoredFaqs = retrieveFAQ(searchTokens);
+
+            let topMatch = scoredFaqs[0];
+            let topConf = (topMatch.score > 1 ? 1 : topMatch.score); // clamp
+            debug.tfIdfMatch = `FAQ #${topMatch.doc.id} (sim: ${topConf.toFixed(2)})`;
+
+            let finalAnswer = "";
+            let confPercent = Math.round(topConf * 100);
+
+            // Support multi-topic specific concatenation
+            if (matchedTopics.length > 1) {
+                let answers = [];
+                matchedTopics.forEach(topic => {
+                    let fid = topicToFaqMap[topic];
+                    if (fid) { let f = corpus.find(c => c.id === fid); if (f) answers.push(f.a); }
+                });
+                if (answers.length > 0) {
+                    finalAnswer = answers.join(" ");
+                    confPercent = 100; // Exact multi-topic match guaranteed
+                }
+            }
+
+            // Apply normal TF-IDF if multi-topic didn't yield specific answers
+            if (!finalAnswer) {
+                if (topConf < 0.15 && matchedTopics.length === 0) {
+                    finalAnswer = "I couldn't find a match. Please call +91-712-2345678 or email admissions@institute.edu.in.";
+                    confPercent = 0;
+                    intentInfo = { name: "GENERAL", prefix: "🤖 [General Assistant]", className: "intent-general", score: 0 };
+                } else {
+                    // Ensure topic fallback if similarity is weirdly low despite matching topic
+                    if (topConf < 0.15 && matchedTopics.length > 0) {
+                        let fid = topicToFaqMap[matchedTopics[0]];
+                        let f = corpus.find(c => c.id === fid);
+                        if (f) { finalAnswer = f.a; confPercent = 90; }
+                        else { finalAnswer = topMatch.doc.a; }
+                    } else {
+                        finalAnswer = topMatch.doc.a;
+                    }
+                }
+            }
+
+            // Prepare related chips
+            let related = [];
+            if (confPercent > 0) {
+                for (let i = 1; i <= 3; i++) {
+                    if (scoredFaqs[i] && scoredFaqs[i].score > 0.05) related.push(scoredFaqs[i].doc.q);
+                }
+            }
+
+            updateStats(confPercent, intentInfo.name);
+            appendBotMsg(finalAnswer, intentInfo, confPercent, related, debug);
+        }
+
+        function appendUserMsg(text) {
+            let html = `<div class="message-wrapper user"><div class="avatar user">👤</div><div class="message-content"><div class="bubble">${text}</div></div></div>`;
+            document.getElementById('typingIndicator').insertAdjacentHTML('beforebegin', html);
+            scrollToBottom();
+        }
+
+        function appendBotMsg(text, intent, conf, related, debug) {
+            let id = 'debug_' + Math.random().toString(36).substr(2, 9);
+
+            let chipsHtml = "";
+            if (related.length > 0) {
+                chipsHtml = `<div class="related-chips"><div style="width:100%; font-size:0.75rem; color:var(--text-light); margin-bottom:4px;">Related Questions:</div>` +
+                    related.map(r => `<div class="chip" onclick="sendMsg('${r.replace(/'/g, "\\'")}')">${r}</div>`).join('') + `</div>`;
+            }
+
+            let debugHtml = `
+        <button class="debug-toggle" onclick="document.getElementById('${id}').classList.toggle('active')">🔍 Show NLP Debug</button>
+        <div class="debug-panel" id="${id}">
+            <div class="debug-step"><span class="debug-label">Step 1 (Lowercased):</span> "${debug.lowercased}"</div>
+            <div class="debug-step"><span class="debug-label">Step 2 (No Punctuation):</span> "${debug.noPunctuation}"</div>
+            <div class="debug-step"><span class="debug-label">Step 3 (Tokens):</span> [${debug.tokens.map(t => `"${t}"`).join(", ")}]</div>
+            <div class="debug-step"><span class="debug-label">Step 4 (Stopwords Removed):</span> [${debug.noStopwords.map(t => `"${t}"`).join(", ")}]</div>
+            <div class="debug-step"><span class="debug-label">Step 5 (Normalized):</span> [${debug.normalized.map(t => `"${t}"`).join(", ")}]</div>
+            <div class="debug-step" style="margin-top:8px; color:#facc15;"><span class="debug-label">Detected Topics (Mod 2):</span> [${debug.matchedTopics.join(', ')}]</div>
+            <div class="debug-step" style="color:var(--badge-teal-text);"><span class="debug-label">Intent (Mod 4):</span> ${debug.intent}</div>
+            <div class="debug-step" style="color:#6ee7b7;"><span class="debug-label">TF-IDF Match (Mod 3):</span> ${debug.tfIdfMatch}</div>
+        </div>
+    `;
+
+            let html = `
+    <div class="message-wrapper bot">
+        <div class="avatar bot">🤖</div>
+        <div class="message-content" style="width: 100%;">
+            <div class="bubble">
+                <div class="meta-row">
+                    <span class="intent-badge ${intent.className}">${intent.prefix}</span>
+                    <div class="conf-text">Conf: ${conf}% <div class="conf-bar-container"><div class="conf-bar" style="width: ${conf}%;"></div></div></div>
+                </div>
+                <div class="answer-text">${text}</div>
+                ${chipsHtml}
+                ${debugHtml}
+            </div>
+        </div>
+    </div>`;
+
+            document.getElementById('typingIndicator').insertAdjacentHTML('beforebegin', html);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            let cb = document.getElementById('chatBody');
+            cb.scrollTo(0, cb.scrollHeight);
+        }
+
+        window.onload = function () {
+            document.getElementById('chatInput').focus();
+        };
+    </script>
+</body>
+
+</html>

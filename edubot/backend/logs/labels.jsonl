@@ -1,0 +1,20 @@
+{"log_id": "LOG-01", "raw_query": "when is sem 5 cs exam", "label": "correct", "note": "Perfect intent + entity extraction", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T09:00:00Z"}
+{"log_id": "LOG-02", "raw_query": "how to apply?", "label": "correct", "note": "Correct admissions routing", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T09:05:00Z"}
+{"log_id": "LOG-03", "raw_query": "can i get a refund?", "label": "correct_fallback", "note": "Routed to handover successfully", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T09:10:00Z"}
+{"log_id": "LOG-04", "raw_query": "my marksheet hasn't arrived", "label": "wrong_intent", "note": "Classified as EXAMS instead of GENERAL issue", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T09:15:00Z"}
+{"log_id": "LOG-05", "raw_query": "first year it time table", "label": "correct", "note": "Entities correctly fetched", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T09:20:00Z"}
+{"log_id": "LOG-06", "raw_query": "fee timings", "label": "wrong_answer", "note": "Returned timings FAQ instead of fees", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T09:25:00Z"}
+{"log_id": "LOG-07", "raw_query": "who is hod of cs", "label": "correct", "note": "Principal/HOD info delivered", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T09:30:00Z"}
+{"log_id": "LOG-08", "raw_query": "i want to apply scholarship for next monday", "label": "missed_entity", "note": "Date entity extraction failed for next monday", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T09:35:00Z"}
+{"log_id": "LOG-09", "raw_query": "fess", "label": "unnecessary_fallback", "note": "Spelling normalizer failed", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T09:40:00Z"}
+{"log_id": "LOG-10", "raw_query": "do you have library access at night?", "label": "needs_new_faq", "note": "Valid query, no FAQ currently covers library hours", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T09:45:00Z"}
+{"log_id": "LOG-11", "raw_query": "asdasdasd", "label": "gibberish", "note": "Fell back properly on gibberish", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T09:50:00Z"}
+{"log_id": "LOG-12", "raw_query": "someone is harassing me in the hostel", "label": "out_of_scope", "note": "Correctly detected sensitive out-of-scope keyword", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T09:55:00Z"}
+{"log_id": "LOG-13", "raw_query": "when is last date for application?", "label": "correct", "note": "Topic detected perfectly", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T10:00:00Z"}
+{"log_id": "LOG-14", "raw_query": "placements in it branch", "label": "correct", "note": "IT branch correctly pulled to Computer Science equivalent", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T10:05:00Z"}
+{"log_id": "LOG-15", "raw_query": "where are u located", "label": "correct", "note": "Mapped to location appropriately", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T10:10:00Z"}
+{"log_id": "LOG-16", "raw_query": "what is hostel mess menu?", "label": "needs_new_faq", "note": "Valid student concern, but missing content", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T10:15:00Z"}
+{"log_id": "LOG-17", "raw_query": "what", "label": "correct_fallback", "note": "Too short, triggered clarification", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T10:20:00Z"}
+{"log_id": "LOG-18", "raw_query": "sem-3 mb fee", "label": "wrong_answer", "note": "Typos confused TF-IDF", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T10:25:00Z"}
+{"log_id": "LOG-19", "raw_query": "i failed 2 subjects", "label": "correct", "note": "Mapped to exam department successfully", "labeled_by": "analyst_02", "labeled_at": "2025-03-11T10:30:00Z"}
+{"log_id": "LOG-20", "raw_query": "i want to apply for civil", "label": "correct", "note": "Course alias worked perfectly for Civil", "labeled_by": "analyst_01", "labeled_at": "2025-03-11T10:35:00Z"}
