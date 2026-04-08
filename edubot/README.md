@@ -2,6 +2,8 @@
 Fully AI-driven FAQ response system utilizing pure Python NLP pipelines (TF-IDF, Tokenization, Classifier, Entity Extraction, Session Management, Channel Formats, and Analytics).
 
 ## Features
+## Features
+## Features
 **Module 1:** Custom Lowercase + Stopword + Stemming preprocessor.
 **Module 2:** Synonym mapping via groups.
 **Module 3:** Pure TF-IDF retrieval system.
